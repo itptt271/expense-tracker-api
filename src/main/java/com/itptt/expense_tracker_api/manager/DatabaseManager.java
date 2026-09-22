@@ -76,15 +76,16 @@ public class DatabaseManager {
         return transactions;
     }
     // 指定したIDの取引を削除
-    public static void deleteTransaction(int id){
+    public static boolean deleteTransaction(int id){
         String sql = "DELETE FROM transactions WHERE id = ?";
         try (Connection conn = connect();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
                 pstmt.setInt(1, id);
-                pstmt.executeUpdate();
-                System.out.println("取引を削除しました。");
+                int rowsAffected = pstmt.executeUpdate();
+                return rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("削除に失敗しました: " + e.getMessage());
+            return false;
         }
     }
     // テスト用：DB内の全取引を表示（デバッグ確認用）
@@ -94,7 +95,7 @@ public class DatabaseManager {
         }
     }
     // 指定したIDの取引を更新
-    public static void updateTransaction(int id, String date, String type, String category, int amount){
+    public static boolean updateTransaction(int id, String date, String type, String category, int amount){
         String sql = "UPDATE transactions SET date = ?, type = ?, category = ?, amount = ? WHERE id = ? ";
         try (Connection conn = connect();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
@@ -103,10 +104,11 @@ public class DatabaseManager {
                 pstmt.setString(3, category);
                 pstmt.setInt(4, amount);
                 pstmt.setInt(5, id);
-                pstmt.executeUpdate();
-                System.out.println("取引を更新しました。");
+                int rowsAffected = pstmt.executeUpdate();
+                return rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("更新に失敗しました: " + e.getMessage());
+            return false;
         }
     }
 }
