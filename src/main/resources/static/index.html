@@ -7,7 +7,7 @@
 <body>
     <h1>家計簿</h1>
     <p>Presonal Expense Tracker</p>
-
+    <!-- 収支サマリー（収入・支出・残高） -->
     <div>
         <span>収入合計: </span>
         <span id="totalIncome">-</span>
@@ -20,6 +20,7 @@
         <span>残高: </span>
         <span id="balance">-</span>
     </div>
+    <!-- 取引の追加・編集フォーム -->
     <form id="txForm">
         <p id="formTitle">取引を追加</p>
 
@@ -42,18 +43,23 @@
         <input type="number" id="amount" min="1" required>
 
         <button type="submit" id="submitBtn">追加</button>
+        <button type="button" onclick="cancelEdit()">キャンセル</button>
     </form>
+    <!-- 取引一覧（JSで動的に生成される） -->
     <p>取引一覧</p>
     <ul id="txList">
         <li>2026-09-21 食費 -5,000円</li>
     </ul>
     <script>
         const API_URL = "/api/transactions";
-        
+        let allTransactions = [];
+        let editingId = null;
+        // GET - 取引一覧を取得して画面に表示
         async function loadTransactions() {
             const res = await fetch(API_URL);
             const transactions = await res.json();
-            
+            allTransactions = transactions;
+            // サマリー（収入合計・支出合計・残高）を計算
             let income = 0;
             let expense = 0;
             for(const t of transactions){
@@ -66,6 +72,7 @@
             document.getElementById("totalIncome").textContent = income;
             document.getElementById("totalExpense").textContent = expense;
             document.getElementById("balance").textContent = income - expense;
+            // 取引一覧のHTMLを組み立てる（編集・削除ボタン付き）
             let listHtml ="";
             for(const t of transactions){
                 let sign = "";
@@ -75,10 +82,32 @@
                     sign = "-";
                 }
                 listHtml = listHtml + "<li>" + t.date + "" +t.category + "" + sign + t.amount + "円 " +
+                    "<button onclick='startEdit(" + t.id +")'>編集</button>" +
                     "<button onclick='deleteTransaction(" + t.id + ")'>削除</button></li>";
             }
             document.getElementById("txList").innerHTML = listHtml;
         }
+        // 編集ボタン - フォームに既存データを反映
+        function startEdit(id){
+            editingId = id;
+            const t = allTransactions.find(function(item){
+                return item.id === id;
+            });
+            document.getElementById("date").value = t.date;
+            document.getElementById("type").value = t.type;
+            document.getElementById("category").value = t.category;
+            document.getElementById("amount").value = t.amount;
+            document.getElementById("formTitle").textContent = "取引を編集";
+            document.getElementById("submitBtn").textContent = "更新";
+        }
+        // キャンセルボタン - 編集状態を解除し、フォームを初期状態に戻す
+        function cancelEdit(){
+            editingId = null;
+            document.getElementById("txForm").reset();
+            document.getElementById("formTitle").textContent = "取引を追加";
+            document.getElementById("submitBtn").textContent = "追加";
+        }
+        // DELETE - 取引を削除
         async function deleteTransaction(id){
             const confirmed = confirm("この取引を削除しますか？");
             if(!confirmed){
@@ -89,6 +118,38 @@
             });
             loadTransactions();
         }
+        document.getElementById("txForm").addEventListener("submit", async function (event){
+            event.preventDefault();
+            
+            const date = document.getElementById("date").value;
+            const type = document.getElementById("type").value;
+            const category = document.getElementById("category").value;
+            const amount = Number(document.getElementById("amount").value);
+            
+            const payload = {
+                date: date,
+                type: type,
+                category: category,
+                amount: amount
+            };
+            
+            if(editingId === null){
+                await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json"},
+                    body: JSON.stringify(payload)
+                });
+            }else{
+                await fetch(API_URL + "/" +editingId, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                editingId = null;
+            }
+            document.getElementById("txForm").reset();
+            loadTransactions();
+        });
         loadTransactions();
     </script>
 </body>
