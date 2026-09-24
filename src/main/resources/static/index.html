@@ -74,9 +74,20 @@
                 }else{
                     sign = "-";
                 }
-                listHtml = listHtml + "<li>" + t.date + "" +t.category + "" + sign + t.amount + "円</li>";
+                listHtml = listHtml + "<li>" + t.date + "" +t.category + "" + sign + t.amount + "円 " +
+                    "<button onclick='deleteTransaction(" + t.id + ")'>削除</button></li>";
             }
             document.getElementById("txList").innerHTML = listHtml;
+        }
+        async function deleteTransaction(id){
+            const confirmed = confirm("この取引を削除しますか？");
+            if(!confirmed){
+                return;
+            }
+            await fetch(API_URL + "/" + id, {
+                method: "DELETE"
+            });
+            loadTransactions();
         }
         loadTransactions();
     </script>
