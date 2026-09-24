@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>家計簿</title>
+</head>
+<body>
+    <h1>家計簿</h1>
+    <p>Presonal Expense Tracker</p>
+
+    <div>
+        <span>収入合計: </span>
+        <span id="totalIncome">-</span>
+    </div>
+    <div>
+        <span>支出合計: </span>
+        <span id="totalExpense">-</span>
+    </div>
+    <div>
+        <span>残高: </span>
+        <span id="balance">-</span>
+    </div>
+    <form id="txForm">
+        <p id="formTitle">取引を追加</p>
+
+        <label for="date">日付</label>
+        <input type="date" id="date" required>
+        
+        <label for="type">タイプ</label>
+        <select id="type">
+            <option value="EXPENSE">支出</option>
+            <option value="INCOME">収入</option>
+        </select>
+
+        <label for="category">カテゴリー</label>
+        <select id="category">
+            <option value="FOOD">食費</option>
+            <option value="SALARY">給料</option>
+        </select>
+
+        <label for="amount">金額（円）</label>
+        <input type="number" id="amount" min="1" required>
+
+        <button type="submit" id="submitBtn">追加</button>
+    </form>
+    <p>取引一覧</p>
+    <ul id="txList">
+        <li>2026-09-21 食費 -5,000円</li>
+    </ul>
+    <script>
+        const API_URL = "/api/transactions";
+        
+        async function loadTransactions() {
+            const res = await fetch(API_URL);
+            const transactions = await res.json();
+            
+            let income = 0;
+            let expense = 0;
+            for(const t of transactions){
+                if(t.type === "INCOME"){
+                    income = income + t.amount;
+                }else{
+                    expense = expense + t.amount;
+                }
+            }
+            document.getElementById("totalIncome").textContent = income;
+            document.getElementById("totalExpense").textContent = expense;
+            document.getElementById("balance").textContent = income - expense;
+            let listHtml ="";
+            for(const t of transactions){
+                let sign = "";
+                if(t.type === "INCOME"){
+                    sign = "+";
+                }else{
+                    sign = "-";
+                }
+                listHtml = listHtml + "<li>" + t.date + "" +t.category + "" + sign + t.amount + "円</li>";
+            }
+            document.getElementById("txList").innerHTML = listHtml;
+        }
+        loadTransactions();
+    </script>
+</body>
+</html>
