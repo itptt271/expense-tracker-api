@@ -54,6 +54,37 @@
         const API_URL = "/api/transactions";
         let allTransactions = [];
         let editingId = null;
+        // カテゴリー一覧（Category.javaのgetJapaneseName()と対応）
+        const CATEGORIES = {
+            INCOME:[
+                ["SALARY", "給料"]
+            ],
+            EXPENSE:[
+                ["FOOD", "食費"],
+                ["ELECTRICITY", "電気代"],
+                ["WATER", "水道代"],
+                ["GAS", "ガス代"],
+                ["INTERNET", "インターネット"],
+                ["INSURANCE", "保険"],
+                ["GYM", "ジム"],
+                ["TRANSPORTATION", "交通費"],
+                ["ENTERTAINMENT", "娯楽"],
+                ["SHOPPING", "買い物"],
+                ["OTHER", "その他"]
+            ]
+        };
+        // タイプに応じてカテゴリーの選択肢を更新
+        function refreshCategoryOptions(){
+            const type = document.getElementById("type").value;
+            const list = CATEGORIES[type];
+            let optionHtml ="";
+            for(const pair of list){
+                const value = pair[0];
+                const label = pair[1];
+                optionHtml = optionHtml + "<option value='" + value + "'>" + label + "</options>";
+            }
+            document.getElementById("category").innerHTML = optionHtml;
+        }
         // GET - 取引一覧を取得して画面に表示
         async function loadTransactions() {
             const res = await fetch(API_URL);
@@ -150,6 +181,8 @@
             document.getElementById("txForm").reset();
             loadTransactions();
         });
+        document.getElementById("type").addEventListener("change", refreshCategoryOptions);
+        refreshCategoryOptions();
         loadTransactions();
     </script>
 </body>
