@@ -181,4 +181,23 @@ public class DatabaseManager {
             return false;
         }
     }
+    // 指定したIDのDebtを1件取得 
+    public static Debt getDebtById(int id){
+        String sql = "SELECT * FROM debts WHERE id = ?";
+        try (Connection conn = connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)){
+                pstmt.setInt(1, id);
+                try(ResultSet rs = pstmt.executeQuery()){
+                    if(rs.next()){
+                        String creditorName = rs.getString("creditorName");
+                        int amount = rs.getInt("amount");
+                        int paidAmount = rs.getInt("paidAmount");
+                        return new Debt(id, creditorName, amount,  paidAmount);
+                    }
+                }
+        } catch (SQLException e) {
+            System.out.println("取得に失敗しました: " + e.getMessage());
+        }
+        return null;
+    }
 }

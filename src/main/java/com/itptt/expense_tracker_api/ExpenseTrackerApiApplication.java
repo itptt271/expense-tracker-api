@@ -10,6 +10,7 @@ public class ExpenseTrackerApiApplication {
 
 	public static void main(String[] args) {
 		DatabaseManager.createTransactionsTable();
+		DatabaseManager.createDebtsTable();
 		SpringApplication.run(ExpenseTrackerApiApplication.class, args);
 	}
 
