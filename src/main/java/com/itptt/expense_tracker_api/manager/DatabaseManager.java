@@ -112,7 +112,7 @@ public class DatabaseManager {
                      "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                      "creditorName TEXT NOT NULL," +
                      "amount INTEGER NOT NULL," +
-                     "paiAmount INTEGER NOT NULL" +
+                     "paidAmount INTEGER NOT NULL" +
                      ")";
         try (Connection conn = connect();
             Statement stmt = conn.createStatement()){
@@ -156,7 +156,7 @@ public class DatabaseManager {
     }
     // 指定したIDのDebtを更新
     public static boolean updateDebtPayment(int id, int newPaiAmount){
-        String sql = "UPDATE debts SET paiAmount = ? WHERE id = ?";
+        String sql = "UPDATE debts SET paidAmount = ? WHERE id = ?";
         try (Connection conn = connect();
             PreparedStatement pstmt = conn.prepareStatement(sql)){         
                 pstmt.setInt(1, newPaiAmount);
