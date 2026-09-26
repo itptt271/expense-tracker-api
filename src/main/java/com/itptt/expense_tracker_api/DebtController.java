@@ -13,6 +13,7 @@ import com.itptt.expense_tracker_api.dto.DebtRequest;
 import com.itptt.expense_tracker_api.dto.PaymentRequest;
 import com.itptt.expense_tracker_api.manager.DatabaseManager;
 import com.itptt.expense_tracker_api.model.Debt;
+import com.itptt.expense_tracker_api.model.DebtPayment;
 import java.util.List;
 
 @RestController 
@@ -52,6 +53,12 @@ public class DebtController {
         String today = java.time.LocalDate.now().toString();
         DatabaseManager.insertDebtPayment(id, today, payment);
         return ResponseEntity.status(HttpStatus.OK).body("返済を記録しました。");
+    }
+    // GET - 指定した借金の返済履歴を取得
+    @GetMapping ("/api/debts/{id}/payments")
+    public ResponseEntity<List<DebtPayment>> getDebtPayments(@PathVariable int id){
+        List<DebtPayment> payments = DatabaseManager.getPaymentsByDebtId(id);
+        return ResponseEntity.status(HttpStatus.OK).body(payments);
     }
     // DELETE - 借金を削除
     @DeleteMapping("/api/debts/{id}")
