@@ -29,7 +29,7 @@ public class DebtController {
         if(request.getAmount() <= 0){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("金額は0より大きい値を入力してください。");
         }
-        DatabaseManager.insertDebt(request.getCreditorName(), request.getAmount(), 0);
+        DatabaseManager.insertDebt(request.getCreditorName(), request.getAmount(), 0, request.getBorrowedDate());
         return ResponseEntity.status(HttpStatus.CREATED).body("借金を追加しました。");
     }
     // POST - 返済を記録
@@ -49,6 +49,8 @@ public class DebtController {
         }
         int newPaidAmount = debt.getPaidAmount() + payment;
         DatabaseManager.updateDebtPayment(id, newPaidAmount);
+        String today = java.time.LocalDate.now().toString();
+        DatabaseManager.insertDebtPayment(id, today, payment);
         return ResponseEntity.status(HttpStatus.OK).body("返済を記録しました。");
     }
     // DELETE - 借金を削除

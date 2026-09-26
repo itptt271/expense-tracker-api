@@ -3,6 +3,7 @@ import com.itptt.expense_tracker_api.model.Debt;
 import com.itptt.expense_tracker_api.model.Transaction;
 import com.itptt.expense_tracker_api.model.TransactionType;
 import com.itptt.expense_tracker_api.model.Category;
+import com.itptt.expense_tracker_api.model.DebtPayment;
 import java.sql.Statement;
 import java.util.List;
 import java.util.ArrayList;
@@ -124,13 +125,14 @@ public class DatabaseManager {
         }
     }
     // DebtをDBに追加
-    public static void insertDebt(String creditorName, int amount, int paidAmount){
-        String sql = "INSERT INTO debts (creditorName, amount, paidAmount) VALUES (?, ?, ?)";
+    public static void insertDebt(String creditorName, int amount, int paidAmount, String borrowedDate){
+        String sql = "INSERT INTO debts (creditorName, amount, paidAmount, borrowedDate) VALUES (?, ?, ?, ?)";
         try (Connection conn = connect();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
                 pstmt.setString(1, creditorName);
                 pstmt.setInt(2, amount);
                 pstmt.setInt(3, paidAmount);
+                pstmt.setString(4, borrowedDate);
                 pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println("追加に失敗しました: " + e.getMessage());
@@ -148,7 +150,8 @@ public class DatabaseManager {
                     String creditorName = rs.getString("creditorName");
                     int amount = rs.getInt("amount");
                     int paidAmount = rs.getInt("paidAmount");
-                    debts.add(new Debt(id, creditorName, amount,  paidAmount));
+                    String borrowedDate = rs.getString("borrowedDate");
+                    debts.add(new Debt(id, creditorName, amount,  paidAmount, borrowedDate));
                 }
         } catch (SQLException e) {
             System.out.println("取得に失敗しました: " + e.getMessage());
@@ -193,7 +196,8 @@ public class DatabaseManager {
                         String creditorName = rs.getString("creditorName");
                         int amount = rs.getInt("amount");
                         int paidAmount = rs.getInt("paidAmount");
-                        return new Debt(id, creditorName, amount,  paidAmount);
+                        String borrowedDate = rs.getString("borrowedDate");
+                        return new Debt(id, creditorName, amount,  paidAmount, borrowedDate);
                     }
                 }
         } catch (SQLException e) {
@@ -217,5 +221,38 @@ public class DatabaseManager {
         } catch (SQLException e) {
             System.out.println("テーブル作成に失敗しました: " + e.getMessage());
         }
+    }
+    // 返済履歴を1件追加
+    public static void insertDebtPayment(int debtId, String paymentDate, int amount){
+        String sql = "INSERT INTO debt_payments (debtId, paymentDate, amount) VALUES (?, ?, ?)";
+        try (Connection conn = connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)){
+                pstmt.setInt(1, debtId);
+                pstmt.setString(2, paymentDate);
+                pstmt.setInt(3, amount);
+                pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("返済履歴の追加に失敗しました: " + e.getMessage());
+        }
+    }
+    // 指定した借金IDの返済履歴を全て取得
+    public static List<DebtPayment> getPaymentsByDebtId(int debtId){
+        List<DebtPayment> payments = new ArrayList<>();
+        String sql = "SELECT * FROM debt_payments WHERE debtId = ?";
+        try (Connection conn = connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)){
+                pstmt.setInt(1, debtId);
+                try(ResultSet rs = pstmt.executeQuery()){
+                    while(rs.next()){
+                        int id = rs.getInt("id");
+                        String paymentDate = rs.getString("paymentDate");
+                        int amount = rs.getInt("amount");
+                        payments.add(new DebtPayment(id, debtId, paymentDate, amount));
+                    }
+                }
+        } catch (SQLException e) {
+            System.out.println("返済履歴の取得に失敗しました: " + e.getMessage());
+        }
+        return payments;
     }
 }
