@@ -112,7 +112,8 @@ public class DatabaseManager {
                      "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                      "creditorName TEXT NOT NULL," +
                      "amount INTEGER NOT NULL," +
-                     "paidAmount INTEGER NOT NULL" +
+                     "paidAmount INTEGER NOT NULL," +
+                     "borrowedDate TEXT NOT NULL" +
                      ")";
         try (Connection conn = connect();
             Statement stmt = conn.createStatement()){
@@ -199,5 +200,22 @@ public class DatabaseManager {
             System.out.println("取得に失敗しました: " + e.getMessage());
         }
         return null;
+    }
+    // debt_paymentsテーブルを作成（返済履歴を保存）
+    public static void createDebtPaymentsTable(){
+        String sql = "CREATE TABLE IF NOT EXISTS debt_payments (" +
+                     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                     "debtId INTEGER NOT NULL," +
+                     "paymentDate TEXT NOT NULL," +
+                     "amount INTEGER NOT NULL," +
+                     "FOREIGN KEY (debtId) REFERENCES debts(id)" +
+                     ")";
+        try (Connection conn = connect();
+            Statement stmt = conn.createStatement()){
+                stmt.execute(sql);
+                System.out.println("debt_paymentsテーブルを作成しました。");
+        } catch (SQLException e) {
+            System.out.println("テーブル作成に失敗しました: " + e.getMessage());
+        }
     }
 }

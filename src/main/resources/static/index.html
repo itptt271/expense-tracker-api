@@ -221,9 +221,27 @@
 
             let listHtml = "";
             for(const d of debts){
-                listHtml = listHtml + "<li>" + d.creditorName + " " + formatYen(d.amount) + " (残り" + formatYen(d.remainingAmount) + ", " + d.progressPercentage.toFixed(0) + "%)</li>"; 
+                listHtml = listHtml + "<li>" + d.creditorName + " " + formatYen(d.amount) + " (残り" + formatYen(d.remainingAmount) + ", " + d.progressPercentage.toFixed(0) + "%) " +
+                    "<button onclick ='payDebt(" + d.id + ", " + d.remainingAmount +")'>返済</button></li>"; 
             }
             document.getElementById("debtList").innerHTML = listHtml;
+        }
+        // 返済ボタン - 返済額を入力してAPIに送信
+        async function payDebt(id, remaining){
+            const input = prompt("返済額を入力してください（残り" + remaining + "円）：");
+            
+            if(input === null){
+                return;
+            }
+
+            const payment = Number(input);
+            
+            await fetch(DEBT_API_URL + "/" + id + "/payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ payment: payment })
+            });
+            loadDebts();
         }
         document.getElementById("debtForm").addEventListener("submit", async function (event) {
             event.preventDefault();
