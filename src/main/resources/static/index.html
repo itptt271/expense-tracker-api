@@ -53,6 +53,15 @@
     <!-- 借金管理 -->
     <hr>
     <h2>借金管理</h2>
+    <form id="debtForm">
+        <label for="creditorName">借入先</label>
+        <input type="text" id="creditorName" required>
+
+        <label for="debtAmount">金額（円）</label>
+        <input type="number" id="debtAmount" min="1" required>
+
+        <button type="submit">借金を追加</button>
+    </form>
     <p>借金一覧</p>
     <ul id="debtList">
         <li>Test Bank ¥10,000 (残り¥10,000, 0%)</li>
@@ -216,6 +225,26 @@
             }
             document.getElementById("debtList").innerHTML = listHtml;
         }
+        document.getElementById("debtForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+            
+            const creditorName = document.getElementById("creditorName").value;
+            const amount = document.getElementById("debtAmount").value;
+
+            const payload = {
+                creditorName: creditorName,
+                amount: amount
+            };
+
+            await fetch(DEBT_API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            
+            document.getElementById("debtForm").reset();
+            loadDebts();
+        });
         loadTransactions();
         loadDebts();
     </script>
