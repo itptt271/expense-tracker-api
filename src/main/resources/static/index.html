@@ -57,6 +57,9 @@
         <label for="creditorName">借入先</label>
         <input type="text" id="creditorName" required>
 
+        <label for="borrowedDate">借入日</label>
+        <input type="date" id="borrowedDate" required>
+
         <label for="debtAmount">金額（円）</label>
         <input type="number" id="debtAmount" min="1" required>
 
@@ -221,8 +224,11 @@
 
             let listHtml = "";
             for(const d of debts){
-                listHtml = listHtml + "<li>" + d.creditorName + " " + formatYen(d.amount) + " (残り" + formatYen(d.remainingAmount) + ", " + d.progressPercentage.toFixed(0) + "%) " +
-                    "<button onclick ='payDebt(" + d.id + ", " + d.remainingAmount +")'>返済</button></li>"; 
+                listHtml = listHtml + "<li>" + d.creditorName + " " + formatYen(d.amount) + " (残り" + formatYen(d.remainingAmount) + ", " + d.progressPercentage.toFixed(0) + "%) [借入日: " + d.borrowedDate + "] " +
+                    "<button onclick ='payDebt(" + d.id + ", " + d.remainingAmount +")'>返済</button>" + 
+                    "<button onclick='toggleHistory(" + d.id + ")'>履歴を見る</button>" +
+                    "<div id='history-" + d.id + "' style='display:none;'></div>" +
+                    "</li>"; 
             }
             document.getElementById("debtList").innerHTML = listHtml;
         }
@@ -243,15 +249,39 @@
             });
             loadDebts();
         }
+        // 返済履歴の表示/非表示を切り替える（アコーディオン）
+        async function toggleHistory(debtId) {
+            const historyDiv = document.getElementById("history-" + debtId);
+            if(historyDiv.style.display === "block"){
+                historyDiv.style.display = "none";
+                return;
+            }
+            const res = await fetch(DEBT_API_URL + "/" + debtId + "/payments");
+            const payments = await res.json();
+
+            let historyHtml = "";
+            for(const p of payments){
+                historyHtml = historyHtml + "<div>" + p.paymentDate + " " + formatYen(p.amount) + "</div>";
+            }
+
+            if(payments.length === 0){
+                historyHtml = "<div>返済履歴がありません。</div>";
+            }
+
+            historyDiv.innerHTML = historyHtml;
+            historyDiv.style.display = "block";
+        }
         document.getElementById("debtForm").addEventListener("submit", async function (event) {
             event.preventDefault();
             
             const creditorName = document.getElementById("creditorName").value;
+            const borrowedDate = document.getElementById("borrowedDate").value;
             const amount = document.getElementById("debtAmount").value;
 
             const payload = {
                 creditorName: creditorName,
-                amount: amount
+                amount: amount,
+                borrowedDate: borrowedDate
             };
 
             await fetch(DEBT_API_URL, {
