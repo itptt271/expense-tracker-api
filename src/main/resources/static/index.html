@@ -48,7 +48,14 @@
     <!-- 取引一覧（JSで動的に生成される） -->
     <p>取引一覧</p>
     <ul id="txList">
-        <li>2026-09-21 食費 -5,000円</li>
+        <li>2026-09-21 食費 ¥5,000</li>
+    </ul>
+    <!-- 借金管理 -->
+    <hr>
+    <h2>借金管理</h2>
+    <p>借金一覧</p>
+    <ul id="debtList">
+        <li>Test Bank ¥10,000 (残り¥10,000, 0%)</li>
     </ul>
     <script>
         const API_URL = "/api/transactions";
@@ -73,6 +80,20 @@
                 ["OTHER", "その他"]
             ]
         };
+        // カテゴリーのコード（例: "FOOD"）から日本語名（例: "食費"）を取得
+        function getCategoryLabel(categoryValue){
+            const allCategories = CATEGORIES.INCOME.concat(CATEGORIES.EXPENSE);
+            for(const pair of allCategories){
+                if(pair[0] === categoryValue){
+                    return pair[1];
+                }
+            }
+            return categoryValue;
+        }
+        // 金額を「¥1,000」の形式に整形
+        function formatYen(amount){
+            return "¥" + amount.toLocaleString("ja-JP");
+        }
         // タイプに応じてカテゴリーの選択肢を更新
         function refreshCategoryOptions(){
             const type = document.getElementById("type").value;
@@ -81,7 +102,7 @@
             for(const pair of list){
                 const value = pair[0];
                 const label = pair[1];
-                optionHtml = optionHtml + "<option value='" + value + "'>" + label + "</options>";
+                optionHtml = optionHtml + "<option value='" + value + "'>" + label + "</option>";
             }
             document.getElementById("category").innerHTML = optionHtml;
         }
@@ -100,9 +121,9 @@
                     expense = expense + t.amount;
                 }
             }
-            document.getElementById("totalIncome").textContent = income;
-            document.getElementById("totalExpense").textContent = expense;
-            document.getElementById("balance").textContent = income - expense;
+            document.getElementById("totalIncome").textContent = formatYen(income);
+            document.getElementById("totalExpense").textContent = formatYen(expense);
+            document.getElementById("balance").textContent = formatYen(income - expense);
             // 取引一覧のHTMLを組み立てる（編集・削除ボタン付き）
             let listHtml ="";
             for(const t of transactions){
@@ -112,7 +133,7 @@
                 }else{
                     sign = "-";
                 }
-                listHtml = listHtml + "<li>" + t.date + "" +t.category + "" + sign + t.amount + "円 " +
+                listHtml = listHtml + "<li>" + t.date + " " +getCategoryLabel(t.category) + " " + sign + formatYen(t.amount) + " " +
                     "<button onclick='startEdit(" + t.id +")'>編集</button>" +
                     "<button onclick='deleteTransaction(" + t.id + ")'>削除</button></li>";
             }
@@ -183,7 +204,20 @@
         });
         document.getElementById("type").addEventListener("change", refreshCategoryOptions);
         refreshCategoryOptions();
+        const DEBT_API_URL = "/api/debts";
+        // GET - 借金一覧を取得して画面に表示
+        async function loadDebts() {
+            const res = await fetch(DEBT_API_URL);
+            const debts = await res.json();
+
+            let listHtml = "";
+            for(const d of debts){
+                listHtml = listHtml + "<li>" + d.creditorName + " " + formatYen(d.amount) + " (残り" + formatYen(d.remainingAmount) + ", " + d.progressPercentage.toFixed(0) + "%)</li>"; 
+            }
+            document.getElementById("debtList").innerHTML = listHtml;
+        }
         loadTransactions();
+        loadDebts();
     </script>
 </body>
 </html>
