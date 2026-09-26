@@ -2,6 +2,7 @@ package com.itptt.expense_tracker_api;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,5 +51,14 @@ public class DebtController {
         DatabaseManager.updateDebtPayment(id, newPaidAmount);
         return ResponseEntity.status(HttpStatus.OK).body("返済を記録しました。");
     }
-
+    // DELETE - 借金を削除
+    @DeleteMapping("/api/debts/{id}")
+    public ResponseEntity<String> deleteDebt(@PathVariable int id){
+        boolean success = DatabaseManager.deleteDebt(id);
+        if(success){
+            return ResponseEntity.status(HttpStatus.OK).body("借金を削除しました。");
+        }else{
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("指定されたIDの借金が見つかりません。");
+        }
+    }
 }
