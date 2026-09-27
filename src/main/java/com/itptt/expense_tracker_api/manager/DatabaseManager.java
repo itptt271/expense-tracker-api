@@ -99,6 +99,28 @@ public class DatabaseManager {
         }
         return transactions;
     }
+    // 日付で取引を検索
+    public static List<Transaction> searchByDate(String date){
+        List<Transaction> transactions = new ArrayList<>();
+        String sql = "SELECT * FROM transactions WHERE date = ?";
+        try (Connection conn = connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)){
+                pstmt.setString(1, date);
+                try(ResultSet rs = pstmt.executeQuery()){
+                    while(rs.next()){
+                        int id = rs.getInt("id");
+                        java.time.LocalDate d = java.time.LocalDate.parse(rs.getString("date"));
+                        TransactionType type = TransactionType.valueOf(rs.getString("type"));
+                        Category cat = Category.valueOf(rs.getString("category"));
+                        int amount = rs.getInt("amount");
+                        transactions.add(new Transaction(id, d, type, cat, amount));
+                    }
+                }
+        } catch (SQLException e) {
+            System.out.println("検索に失敗しました: " + e.getMessage());
+        }
+        return transactions;
+    }
     // 指定したIDの取引を削除
     public static boolean deleteTransaction(int id){
         String sql = "DELETE FROM transactions WHERE id = ?";

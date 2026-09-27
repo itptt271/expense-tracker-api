@@ -32,6 +32,12 @@ public class TransactionController {
         List<Transaction> transactions = DatabaseManager.searchByCategory(category);
         return ResponseEntity.status(HttpStatus.OK).body(transactions);
     }
+    // GET - 日付で取引を検索
+    @GetMapping ("/api/transactions/search/date")
+    public ResponseEntity<List<Transaction>> searchByDate(@RequestParam String date){
+        List<Transaction> transactions = DatabaseManager.searchByDate(date);
+        return ResponseEntity.status(HttpStatus.OK).body(transactions);
+    }
     // POST - 取引を新規追加
     @PostMapping("/api/transactions")
     public ResponseEntity<String> addTransaction(@RequestBody  TransactionRequest request){
