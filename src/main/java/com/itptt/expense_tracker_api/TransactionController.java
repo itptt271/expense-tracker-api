@@ -26,17 +26,13 @@ public class TransactionController {
         List<Transaction> transactions = DatabaseManager.getAllTransactions();
         return ResponseEntity.status(HttpStatus.OK).body(transactions);
     }
-    // GET - カテゴリーで取引を検索
-    @GetMapping ("/api/transactions/search/category")
-    public ResponseEntity<List<Transaction>> searchByCategory(@RequestParam String category){
-        List<Transaction> transactions = DatabaseManager.searchByCategory(category);
-        return ResponseEntity.status(HttpStatus.OK).body(transactions);
-    }
-    // GET - 日付で取引を検索
-    @GetMapping ("/api/transactions/search/date")
-    public ResponseEntity<List<Transaction>> searchByDate(@RequestParam String date){
-        List<Transaction> transactions = DatabaseManager.searchByDate(date);
-        return ResponseEntity.status(HttpStatus.OK).body(transactions);
+    // GET - カテゴリー・日付で取引を検索（両方またはどちらか一方を指定可能）
+    @GetMapping ("/api/transactions/search")
+    public ResponseEntity<List<Transaction>> searchTransactions(
+        @RequestParam(required = false) String category,
+        @RequestParam(required = false) String date){
+            List<Transaction> transactions = DatabaseManager.searchTransactions(category, date);
+            return ResponseEntity.status(HttpStatus.OK).body(transactions);
     }
     // POST - 取引を新規追加
     @PostMapping("/api/transactions")
