@@ -14,14 +14,22 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
+
 @RestController 
 public class TransactionController {
     // GET - 取引一覧を取得
     @GetMapping("/api/transactions")
     public ResponseEntity<List<Transaction>> getAllTransactions(){
         List<Transaction> transactions = DatabaseManager.getAllTransactions();
+        return ResponseEntity.status(HttpStatus.OK).body(transactions);
+    }
+    // GET - カテゴリーで取引を検索
+    @GetMapping ("/api/transactions/search/category")
+    public ResponseEntity<List<Transaction>> searchByCategory(@RequestParam String category){
+        List<Transaction> transactions = DatabaseManager.searchByCategory(category);
         return ResponseEntity.status(HttpStatus.OK).body(transactions);
     }
     // POST - 取引を新規追加
