@@ -53,6 +53,10 @@
     <!-- 借金管理 -->
     <hr>
     <h2>借金管理</h2>
+    <div>
+        <span>借金合計（残り）: </span>
+        <span id="totalRemainingDebt">-</span>
+    </div>
     <form id="debtForm">
         <label for="creditorName">借入先</label>
         <input type="text" id="creditorName" required>
@@ -221,6 +225,12 @@
         async function loadDebts() {
             const res = await fetch(DEBT_API_URL);
             const debts = await res.json();
+
+            let totalRemaining = 0;
+            for(const d of debts){
+                totalRemaining = totalRemaining + d.remainingAmount;
+            }
+            document.getElementById("totalRemainingDebt").textContent = formatYen(totalRemaining);
 
             let listHtml = "";
             for(const d of debts){
