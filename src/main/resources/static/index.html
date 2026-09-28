@@ -50,6 +50,19 @@
     <ul id="txList">
         <li>2026-09-21 食費 ¥5,000</li>
     </ul>
+    <!-- カテゴリー別統計 -->
+    <h2>カテゴリー別統計</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>カテゴリー</th>
+                <th>金額</th>
+                <th>割合</th>
+            </tr>
+        </thead>
+        <tbody id="categoryStatsBody"></tbody>
+    </table>
+    <p id="mostUsedCategory"></p>
     <!-- 借金管理 -->
     <hr>
     <h2>借金管理</h2>
@@ -122,6 +135,42 @@
             }
             document.getElementById("category").innerHTML = optionHtml;
         }
+        // カテゴリー別の支出を集計して表に表示
+        function renderCategoryStats(transactions){
+            const categoryTotals = {};
+            let totalExpense = 0;
+            for(const t of transactions){
+                if(t.type === "EXPENSE"){
+                    if(categoryTotals[t.category] === undefined){
+                        categoryTotals[t.category] = 0;
+                    }
+                    categoryTotals[t.category] = categoryTotals[t.category] + t.amount;
+                    totalExpense = totalExpense + t.amount;
+                }
+            }
+            if(totalExpense === 0){
+                document.getElementById("categoryStatsBody").innerHTML = 
+                     "<tr><td colspan='3'>データがありません</td></tr>";
+                document.getElementById("mostUsedCategory").textContent = "";
+                return;
+            }
+            let rowsHtml = "";
+            let mostUsedCategory = null;
+            let maxAmount = 0;
+            for(const category in categoryTotals){
+                const amount = categoryTotals[category];
+                const percentage = (amount / totalExpense * 100).toFixed(0);
+                rowsHtml = rowsHtml + "<tr><td>" + getCategoryLabel(category) + "</td><td>" +
+                    formatYen(amount) + "</td><td>" + percentage + "%</td></tr>";
+                if(amount > maxAmount){
+                    maxAmount = amount;
+                    mostUsedCategory = category;
+                }
+            }
+            document.getElementById("categoryStatsBody").innerHTML = rowsHtml;
+            document.getElementById("mostUsedCategory").textContent = 
+                "一番使ったカテゴリー: " + getCategoryLabel(mostUsedCategory);
+        }
         // GET - 取引一覧を取得して画面に表示
         async function loadTransactions() {
             const res = await fetch(API_URL);
@@ -140,6 +189,7 @@
             document.getElementById("totalIncome").textContent = formatYen(income);
             document.getElementById("totalExpense").textContent = formatYen(expense);
             document.getElementById("balance").textContent = formatYen(income - expense);
+            renderCategoryStats(transactions);
             // 取引一覧のHTMLを組み立てる（編集・削除ボタン付き）
             let listHtml ="";
             for(const t of transactions){
@@ -286,7 +336,7 @@
             
             const creditorName = document.getElementById("creditorName").value;
             const borrowedDate = document.getElementById("borrowedDate").value;
-            const amount = document.getElementById("debtAmount").value;
+            const amount = Number(document.getElementById("debtAmount").value);
 
             const payload = {
                 creditorName: creditorName,
