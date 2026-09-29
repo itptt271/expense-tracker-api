@@ -20,6 +20,10 @@
         <span>残高: </span>
         <span id="balance">-</span>
     </div>
+    <div>
+        <span>貯金額: </span>
+        <span id="savingsRate">-</span>
+    </div>
     <!-- 取引の追加・編集フォーム -->
     <form id="txForm">
         <p id="formTitle">取引を追加</p>
@@ -189,6 +193,12 @@
             document.getElementById("totalIncome").textContent = formatYen(income);
             document.getElementById("totalExpense").textContent = formatYen(expense);
             document.getElementById("balance").textContent = formatYen(income - expense);
+            if(income === 0){
+                document.getElementById("savingsRate").textContent = "データがありません";
+            }else{
+                const savingsRate = (income - expense) / income * 100;
+                document.getElementById("savingsRate").textContent = savingsRate.toFixed(0) + "%";
+            }
             renderCategoryStats(transactions);
             // 取引一覧のHTMLを組み立てる（編集・削除ボタン付き）
             let listHtml ="";
@@ -284,7 +294,13 @@
 
             let listHtml = "";
             for(const d of debts){
-                listHtml = listHtml + "<li>" + d.creditorName + " " + formatYen(d.amount) + " (残り" + formatYen(d.remainingAmount) + ", " + d.progressPercentage.toFixed(0) + "%) [借入日: " + d.borrowedDate + "] " +
+                let status = "";
+                if(d.paid){
+                    status = "返済済み";
+                }else{
+                    status = "返済中";
+                }
+                listHtml = listHtml + "<li>" + d.creditorName + " " + formatYen(d.amount) + " (残り" + formatYen(d.remainingAmount) + ", " + d.progressPercentage.toFixed(0) + "%, " + status + ") [借入日: " + d.borrowedDate + "] " +
                     "<button onclick ='payDebt(" + d.id + ", " + d.remainingAmount +")'>返済</button>" + 
                     "<button onclick='toggleHistory(" + d.id + ")'>履歴を見る</button>" +
                     "<div id='history-" + d.id + "' style='display:none;'></div>" +
