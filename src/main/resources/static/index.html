@@ -303,6 +303,7 @@
                 listHtml = listHtml + "<li>" + d.creditorName + " " + formatYen(d.amount) + " (残り" + formatYen(d.remainingAmount) + ", " + d.progressPercentage.toFixed(0) + "%, " + status + ") [借入日: " + d.borrowedDate + "] " +
                     "<button onclick ='payDebt(" + d.id + ", " + d.remainingAmount +")'>返済</button>" + 
                     "<button onclick='toggleHistory(" + d.id + ")'>履歴を見る</button>" +
+                    "<button onclick='deleteDebt(" + d.id + ")'>削除</button>" +
                     "<div id='history-" + d.id + "' style='display:none;'></div>" +
                     "</li>"; 
             }
@@ -322,6 +323,17 @@
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ payment: payment })
+            });
+            loadDebts();
+        }
+        // DELETE - 借金を削除
+        async function deleteDebt(id){
+            const confirmed = confirm("この借金を削除しますか？返済履歴も削除されます。");
+            if(!confirmed){
+                return;
+            }
+            await fetch (DEBT_API_URL + "/" + id, {
+                method: "DELETE"
             });
             loadDebts();
         }

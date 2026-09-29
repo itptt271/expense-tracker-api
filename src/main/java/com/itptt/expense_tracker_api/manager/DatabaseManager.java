@@ -207,13 +207,20 @@ public class DatabaseManager {
     }
     // 指定したIDのDebtを削除
     public static boolean deleteDebt(int id){
-        String sql = "DELETE FROM debts WHERE id = ?";
-        try (Connection conn = connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql)){
+        String deleteDebtSql = "DELETE FROM debts WHERE id = ?";
+        String deletePaymentsSql = "DELETE FROM debt_payments WHERE debtId = ?";
+        try (Connection conn = connect()){
+            try(PreparedStatement pstmt = conn.prepareStatement(deletePaymentsSql)){
+                pstmt.setInt(1, id);
+                pstmt.executeUpdate();
+            }
+            try(PreparedStatement pstmt = conn.prepareStatement(deleteDebtSql)){
                 pstmt.setInt(1, id);
                 int rowsAffected = pstmt.executeUpdate();
                 return rowsAffected > 0;
-        } catch (SQLException e) {
+            }
+        } 
+        catch (SQLException e) {
             System.out.println("削除に失敗しました: " + e.getMessage());
             return false;
         }
