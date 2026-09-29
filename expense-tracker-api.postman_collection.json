@@ -1,11 +1,8 @@
 {
   "info": {
-    "_postman_id": "731ab423-f31f-4b13-9a81-fe31d40ab4f3",
     "name": "Expense Tracker API",
     "description": "REST API cho quản lý giao dịch (Transaction) - Spring Boot",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "58457478",
-    "_collection_link": "https://go.postman.co/collection/58457478-731ab423-f31f-4b13-9a81-fe31d40ab4f3?source=collection_link"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
@@ -16,17 +13,11 @@
         "url": {
           "raw": "http://localhost:8080/api/transactions",
           "protocol": "http",
-          "host": [
-            "localhost"
-          ],
+          "host": ["localhost"],
           "port": "8080",
-          "path": [
-            "api",
-            "transactions"
-          ]
+          "path": ["api", "transactions"]
         }
-      },
-      "response": []
+      }
     },
     {
       "name": "Add Transaction",
@@ -45,17 +36,11 @@
         "url": {
           "raw": "http://localhost:8080/api/transactions",
           "protocol": "http",
-          "host": [
-            "localhost"
-          ],
+          "host": ["localhost"],
           "port": "8080",
-          "path": [
-            "api",
-            "transactions"
-          ]
+          "path": ["api", "transactions"]
         }
-      },
-      "response": []
+      }
     },
     {
       "name": "Update Transaction",
@@ -74,18 +59,11 @@
         "url": {
           "raw": "http://localhost:8080/api/transactions/1",
           "protocol": "http",
-          "host": [
-            "localhost"
-          ],
+          "host": ["localhost"],
           "port": "8080",
-          "path": [
-            "api",
-            "transactions",
-            "1"
-          ]
+          "path": ["api", "transactions", "1"]
         }
-      },
-      "response": []
+      }
     },
     {
       "name": "Delete Transaction",
@@ -95,18 +73,11 @@
         "url": {
           "raw": "http://localhost:8080/api/transactions/1",
           "protocol": "http",
-          "host": [
-            "localhost"
-          ],
+          "host": ["localhost"],
           "port": "8080",
-          "path": [
-            "api",
-            "transactions",
-            "1"
-          ]
+          "path": ["api", "transactions", "1"]
         }
-      },
-      "response": []
+      }
     }
   ]
 }
