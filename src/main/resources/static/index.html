@@ -49,6 +49,18 @@
         <button type="submit" id="submitBtn">追加</button>
         <button type="button" onclick="cancelEdit()">キャンセル</button>
     </form>
+    <!-- 取引の検索 -->
+    <form id="searchForm">
+        <p>取引を検索</p>
+        <label for="searchCategory">カテゴリー</label>
+        <select id="searchCategory">
+            <option value="">すべて</option>
+        </select>
+        <label for="searchDate">日付</label>
+        <input type="date" id="searchDate">
+        <button type="submit">検索</button>
+        <button type="button" onclick="resetSearch()">クリア</button>
+    </form>
     <!-- 取引一覧（JSで動的に生成される） -->
     <p>取引一覧</p>
     <ul id="txList">
@@ -139,6 +151,17 @@
             }
             document.getElementById("category").innerHTML = optionHtml;
         }
+        // 検索フォームのカテゴリー選択肢を設定（「すべて」+ 全カテゴリー）
+        function fillSearchCategoryOptions(){
+            const allCategories = CATEGORIES.INCOME.concat(CATEGORIES.EXPENSE);
+            let optionHtml = "<option value=''>すべて</option>";
+            for(const pair of allCategories){
+                const value = pair[0];
+                const label = pair[1];
+                optionHtml = optionHtml + "<option value='" + value + "'>" + label + "</option>";
+            }
+            document.getElementById("searchCategory").innerHTML = optionHtml;
+        }
         // カテゴリー別の支出を集計して表に表示
         function renderCategoryStats(transactions){
             const categoryTotals = {};
@@ -175,6 +198,43 @@
             document.getElementById("mostUsedCategory").textContent = 
                 "一番使ったカテゴリー: " + getCategoryLabel(mostUsedCategory);
         }
+        // 取引一覧を画面に描画する（loadTransactionsとsearchTransactionsで共用）
+        function renderTransactionList(transactions){
+            // 取引一覧のHTMLを組み立てる（編集・削除ボタン付き）
+            let listHtml ="";
+            for(const t of transactions){
+                let sign = "";
+                if(t.type === "INCOME"){
+                    sign = "+";
+                }else{
+                    sign = "-";
+                }
+                listHtml = listHtml + "<li>" + t.date + " " +getCategoryLabel(t.category) + " " + sign + formatYen(t.amount) + " " +
+                    "<button onclick='startEdit(" + t.id +")'>編集</button>" +
+                    "<button onclick='deleteTransaction(" + t.id + ")'>削除</button></li>";
+            }
+            document.getElementById("txList").innerHTML = listHtml;
+        }
+        // GET - 検索条件に応じて取引を絞り込む
+        async function searchTransactions(){
+            const category = document.getElementById("searchCategory").value;
+            const date = document.getElementById("searchDate").value;
+            let url = "/api/transactions/search?";
+            if(category !== ""){
+                url = url + "category=" + category + "&";
+            }
+            if(date !== ""){
+                url = url + "date=" + date + "&";
+            }
+            const res = await fetch(url);
+            const transactions = await res.json();
+            renderTransactionList(transactions);
+        }
+        // 検索条件をクリアして、全ての取引を再表示
+        function resetSearch(){
+            document.getElementById("searchForm").reset();
+            loadTransactions();
+        }
         // GET - 取引一覧を取得して画面に表示
         async function loadTransactions() {
             const res = await fetch(API_URL);
@@ -200,20 +260,7 @@
                 document.getElementById("savingsRate").textContent = savingsRate.toFixed(0) + "%";
             }
             renderCategoryStats(transactions);
-            // 取引一覧のHTMLを組み立てる（編集・削除ボタン付き）
-            let listHtml ="";
-            for(const t of transactions){
-                let sign = "";
-                if(t.type === "INCOME"){
-                    sign = "+";
-                }else{
-                    sign = "-";
-                }
-                listHtml = listHtml + "<li>" + t.date + " " +getCategoryLabel(t.category) + " " + sign + formatYen(t.amount) + " " +
-                    "<button onclick='startEdit(" + t.id +")'>編集</button>" +
-                    "<button onclick='deleteTransaction(" + t.id + ")'>削除</button></li>";
-            }
-            document.getElementById("txList").innerHTML = listHtml;
+            renderTransactionList(transactions);
         }
         // 編集ボタン - フォームに既存データを反映
         function startEdit(id){
@@ -285,6 +332,11 @@
         });
         document.getElementById("type").addEventListener("change", refreshCategoryOptions);
         refreshCategoryOptions();
+        fillSearchCategoryOptions();
+        document.getElementById("searchForm").addEventListener("submit", function(event){
+            event.preventDefault();
+            searchTransactions();
+        });
         const DEBT_API_URL = "/api/debts";
         // GET - 借金一覧を取得して画面に表示
         async function loadDebts() {
