@@ -260,21 +260,26 @@
                 category: category,
                 amount: amount
             };
-            
+            let res;
             if(editingId === null){
-                await fetch(API_URL, {
+                res = await fetch(API_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json"},
                     body: JSON.stringify(payload)
                 });
             }else{
-                await fetch(API_URL + "/" +editingId, {
+                res = await fetch(API_URL + "/" +editingId, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
-                editingId = null;
             }
+            if(!res.ok){
+                const message = await res.text();
+                alert(message);
+                return;
+            }
+            editingId = null;
             document.getElementById("txForm").reset();
             loadTransactions();
         });
@@ -312,18 +317,20 @@
         // 返済ボタン - 返済額を入力してAPIに送信
         async function payDebt(id, remaining){
             const input = prompt("返済額を入力してください（残り" + remaining + "円）：");
-            
             if(input === null){
                 return;
             }
-
             const payment = Number(input);
-            
-            await fetch(DEBT_API_URL + "/" + id + "/payment", {
+            const res = await fetch(DEBT_API_URL + "/" + id + "/payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ payment: payment })
             });
+            if(!res.ok){
+                const message = await res.text();
+                alert(message);
+                return;
+            }
             loadDebts();
         }
         // DELETE - 借金を削除
