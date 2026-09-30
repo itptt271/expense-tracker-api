@@ -21,7 +21,7 @@
             margin-left: auto;
             margin-right: auto;
         }
-        #tab-transactions, #tab-search, #tab-sumary, #tab-debts, #tab-history{
+        #tab-transactions, #tab-search, #tab-summary, #tab-debts, #tab-history{
             display: none;
         }
         #tab-transactions.active, #tab-search.active, #tab-summary.active, #tab-debts.active, #tab-history.active{
@@ -82,8 +82,11 @@
         <button type="submit">検索</button>
         <button type="button" onclick="resetSearch()">クリア</button>
     </form>
+    <p>検索結果</p>
+    <ul id="searchResultsList"></ul>
     </div>
     <div id="tab-summary">
+    <h2>サマリー</h2>
     <!-- 収支サマリー（収入・支出・残高） -->
     <div>
         <span>収入合計: </span>
@@ -247,7 +250,7 @@
                 "一番使ったカテゴリー: " + getCategoryLabel(mostUsedCategory);
         }
         // 取引一覧を画面に描画する（loadTransactionsとsearchTransactionsで共用）
-        function renderTransactionList(transactions){
+        function renderTransactionList(transactions, targetListId){
             // 取引一覧のHTMLを組み立てる（編集・削除ボタン付き）
             let listHtml ="";
             for(const t of transactions){
@@ -261,7 +264,7 @@
                     "<button onclick='startEdit(" + t.id +")'>編集</button>" +
                     "<button onclick='deleteTransaction(" + t.id + ")'>削除</button></li>";
             }
-            document.getElementById("txList").innerHTML = listHtml;
+            document.getElementById(targetListId).innerHTML = listHtml;
         }
         // GET - 検索条件に応じて取引を絞り込む
         async function searchTransactions(){
@@ -276,7 +279,7 @@
             }
             const res = await fetch(url);
             const transactions = await res.json();
-            renderTransactionList(transactions);
+            renderTransactionList(transactions, "searchResultsList");
         }
         // 検索条件をクリアして、全ての取引を再表示
         function resetSearch(){
@@ -308,7 +311,7 @@
                 document.getElementById("savingsRate").textContent = savingsRate.toFixed(0) + "%";
             }
             renderCategoryStats(transactions);
-            renderTransactionList(transactions);
+            renderTransactionList(transactions, "txList");
         }
         // 編集ボタン - フォームに既存データを反映
         function startEdit(id){
