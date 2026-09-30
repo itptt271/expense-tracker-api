@@ -21,10 +21,10 @@
             margin-left: auto;
             margin-right: auto;
         }
-        #tab-transactions, #tab-search, #tab-summary, #tab-debts, #tab-history{
+        #tab-transactions, #tab-search, #tab-summary, #tab-debts{
             display: none;
         }
-        #tab-transactions.active, #tab-search.active, #tab-summary.active, #tab-debts.active, #tab-history.active{
+        #tab-transactions.active, #tab-search.active, #tab-summary.active, #tab-debts.active{
             display: block;
         }
     </style>
@@ -37,7 +37,6 @@
         <button type="button" onclick="showTab('search')">検索</button>
         <button type="button" onclick="showTab('summary')">サマリー</button>
         <button type="button" onclick="showTab('debts')">借金</button>
-        <button type="button" onclick="showTab('history')">履歴</button>
     </div>
     <div id="tab-transactions">
      <!-- 取引の追加・編集フォーム -->
@@ -140,17 +139,13 @@
     <p>借金一覧</p>
     <ul id="debtList"></ul>
     </div>
-    <div id="tab-history">
-        <p>返済履歴</p>
-        <ul id="debtPaymentHistoryList"></ul>
-    </div>
     <script>
         const API_URL = "/api/transactions";
         let allTransactions = [];
         let editingId = null;
         // タブを切り替える
         function showTab(tabName){
-            const tabs = ["transactions", "search", "summary", "debts", "history"];
+            const tabs = ["transactions", "search", "summary", "debts"];
             for(const name of tabs){
                 document.getElementById("tab-" + name).classList.remove("active");
             }
