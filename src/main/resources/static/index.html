@@ -12,14 +12,20 @@
             --line: #D7DAD2;
         }
         body{
-            background: var(--paper);
+            background: #DEE1DB;
             color: var(--ink);
             font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
             margin: 0;
-            padding: 20px 16px 60px;
+            padding: 24px 16px;
+        }
+        .page{
+            background: var(--paper);
             max-width: 560px;
             margin-left: auto;
             margin-right: auto;
+            padding: 24px 20px 48px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
         }
         #tab-transactions, #tab-search, #tab-summary, #tab-debts{
             display: none;
@@ -27,9 +33,40 @@
         #tab-transactions.active, #tab-search.active, #tab-summary.active, #tab-debts.active{
             display: block;
         }
+
+        #debtList{
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #debtList li{
+            display:flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        #debtList li .debt-amount{
+            font-family: "SF Mono", "Menlo", monospace;
+            font-weight: 600;
+        }
+
+        #debtList button {
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--ink);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <div class="page">
     <h1>家計簿</h1>
     <p>Presonal Expense Tracker</p>
     <div class="tabs">
@@ -138,6 +175,7 @@
     </form>
     <p>借金一覧</p>
     <ul id="debtList"></ul>
+    </div>
     </div>
     <script>
         const API_URL = "/api/transactions";
@@ -403,7 +441,8 @@
                 }else{
                     status = "返済中";
                 }
-                listHtml = listHtml + "<li>" + d.creditorName + " " + formatYen(d.amount) + " (残り" + formatYen(d.remainingAmount) + ", " + d.progressPercentage.toFixed(0) + "%, " + status + ") [借入日: " + d.borrowedDate + "] " +
+                listHtml = listHtml + "<li>" + 
+                    "<span class='debt-main'>" + d.creditorName + " " + formatYen(d.amount) + " (残り" + formatYen(d.remainingAmount) + ", " + d.progressPercentage.toFixed(0) + "%, " + status + ") [借入日: " + d.borrowedDate + "]</spam>" +
                     "<button onclick ='payDebt(" + d.id + ", " + d.remainingAmount +")'>返済</button>" + 
                     "<button onclick='toggleHistory(" + d.id + ")'>履歴を見る</button>" +
                     "<button onclick='deleteDebt(" + d.id + ")'>削除</button>" +
