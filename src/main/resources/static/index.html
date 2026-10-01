@@ -223,6 +223,35 @@
             min-width: 80px;
             margin-top: 6px;
         }
+
+        .summary-grid{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card{
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 14px;
+            background: #FFFFFF;
+        }
+
+        .summary-label{
+            display: block;
+            font-size: 12px;
+            color: var(--ink);
+            opacity: 0.7;
+            margin-bottom: 4px;
+        }
+
+        .summary-value{
+            display: block;
+            font-family: "SF Mono", "Menlo", monospace;
+            font-size: 20px;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -284,21 +313,23 @@
     <div id="tab-summary">
     <h2>サマリー</h2>
     <!-- 収支サマリー（収入・支出・残高） -->
-    <div>
-        <span>収入合計: </span>
-        <span id="totalIncome">-</span>
-    </div>
-    <div>
-        <span>支出合計: </span>
-        <span id="totalExpense">-</span>
-    </div>
-    <div>
-        <span>残高: </span>
-        <span id="balance">-</span>
-    </div>
-    <div>
-        <span>貯金額: </span>
-        <span id="savingsRate">-</span>
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-label">収入合計</span>
+            <span class="summary-value income" id="totalIncome">-</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">支出合計</span>
+            <span class="summary-value expense" id="totalExpense">-</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">残高</span>
+            <span class="summary-value" id="balance">-</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">貯金額</span>
+            <span class="summary-value" id="savingsRate">-</span>
+        </div>
     </div>
     <!-- カテゴリー別統計 -->
     <h2>カテゴリー別統計</h2>
