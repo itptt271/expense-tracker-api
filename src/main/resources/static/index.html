@@ -63,6 +63,29 @@
             font-size: 13px;
             cursor: pointer;
         }
+
+        .tabs{
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tabs button{
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--ink);
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .tabs button.active-tab{
+            background: var(--ink);
+            color: var(--paper);
+            border-color: var(--ink);
+        }
     </style>
 </head>
 <body>
@@ -70,10 +93,10 @@
     <h1>家計簿</h1>
     <p>Presonal Expense Tracker</p>
     <div class="tabs">
-        <button type="button" onclick="showTab('transactions')">取引</button>
-        <button type="button" onclick="showTab('search')">検索</button>
-        <button type="button" onclick="showTab('summary')">サマリー</button>
-        <button type="button" onclick="showTab('debts')">借金</button>
+        <button type="button" onclick="showTab('transactions', this)">取引</button>
+        <button type="button" onclick="showTab('search', this)">検索</button>
+        <button type="button" onclick="showTab('summary', this)">サマリー</button>
+        <button type="button" onclick="showTab('debts', this)">借金</button>
     </div>
     <div id="tab-transactions">
      <!-- 取引の追加・編集フォーム -->
@@ -182,14 +205,22 @@
         let allTransactions = [];
         let editingId = null;
         // タブを切り替える
-        function showTab(tabName){
+        function showTab(tabName, clickedButton){
             const tabs = ["transactions", "search", "summary", "debts"];
             for(const name of tabs){
                 document.getElementById("tab-" + name).classList.remove("active");
             }
             document.getElementById("tab-" + tabName).classList.add("active");
+
+            const buttons = document.querySelectorAll(".tabs button");
+            for(const btn of buttons){
+                btn.classList.remove("active-tab");
+            }
+            if(clickedButton){
+                clickedButton.classList.add("active-tab")
+            }
         }
-        showTab("transactions");
+        showTab("transactions", document.querySelector(".tabs button"));
         // カテゴリー一覧（Category.javaのgetJapaneseName()と対応）
         const CATEGORIES = {
             INCOME:[
@@ -442,7 +473,7 @@
                     status = "返済中";
                 }
                 listHtml = listHtml + "<li>" + 
-                    "<span class='debt-main'>" + d.creditorName + " " + formatYen(d.amount) + " (残り" + formatYen(d.remainingAmount) + ", " + d.progressPercentage.toFixed(0) + "%, " + status + ") [借入日: " + d.borrowedDate + "]</spam>" +
+                    "<spam class='debt-main'>" + d.creditorName + " " + formatYen(d.amount) + " (残り" + formatYen(d.remainingAmount) + ", " + d.progressPercentage.toFixed(0) + "%, " + status + ") [借入日: " + d.borrowedDate + "]</spam>" +
                     "<button onclick ='payDebt(" + d.id + ", " + d.remainingAmount +")'>返済</button>" + 
                     "<button onclick='toggleHistory(" + d.id + ")'>履歴を見る</button>" +
                     "<button onclick='deleteDebt(" + d.id + ")'>削除</button>" +
