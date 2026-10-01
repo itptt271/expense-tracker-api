@@ -137,6 +137,20 @@
         #debtList .history-box div{
             padding: 4px 0;
         }
+
+        .income{
+            color: var(--income);
+        }
+        .expense{
+            color: var(--expense);
+        }
+
+        #debtList .borrowed-date{
+            flex-basis: 100%;
+            font-size: 13px;
+            color: var(--ink);
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
@@ -370,14 +384,17 @@
             let listHtml ="";
             for(const t of transactions){
                 let sign = "";
+                let amountClass = "";
                 if(t.type === "INCOME"){
                     sign = "+";
+                    amountClass = "income";
                 }else{
                     sign = "-";
+                    amountClass = "expense";
                 }
                 listHtml = listHtml + "<li>" + 
                     "<span class='tx-main'>" + t.date + " " +getCategoryLabel(t.category) + "</span>" +
-                    "<span class='tx-amount'>" + sign + formatYen(t.amount) + "</span>" +
+                    "<span class='tx-amount " + amountClass + "'>" + sign + formatYen(t.amount) + "</span>" +
                     "<button onclick='startEdit(" + t.id +")'>編集</button>" +
                     "<button onclick='deleteTransaction(" + t.id + ")'>削除</button></li>";
             }
@@ -520,13 +537,23 @@
             let listHtml = "";
             for(const d of debts){
                 let status = "";
+                let statusClass = "";
                 if(d.paid){
                     status = "返済済み";
+                    statusClass = "income";
                 }else{
                     status = "返済中";
+                    statusClass = "expense";
+                }
+                let remainingClass = "";
+                if(d.remainingAmount > 0){
+                    remainingClass = "expense";
+                }else{
+                    remainingClass = "income";
                 }
                 listHtml = listHtml + "<li>" + 
-                    "<span class='debt-main'>" + d.creditorName + " " + formatYen(d.amount) + " (残り<span class='debt-amount'>" + formatYen(d.remainingAmount) + "</span>," + d.progressPercentage.toFixed(0) + "%, " + status + ") [借入日: " + d.borrowedDate + "]</span>" +
+                    "<span class='debt-main'>" + d.creditorName + " " + formatYen(d.amount) + " (残り<span class='debt-amount " + remainingClass + "'>" + formatYen(d.remainingAmount) + "</span>, " + d.progressPercentage.toFixed(0) + "%, <span class='" + statusClass + "'>" + status + "</span>)</span> " + 
+                    "<span class='borrowed-date'>借入日: " + d.borrowedDate + "</span>" +
                     "<button onclick ='payDebt(" + d.id + ", " + d.remainingAmount +")'>返済</button>" + 
                     "<button onclick='toggleHistory(" + d.id + ")'>履歴を見る</button>" +
                     "<button onclick='deleteDebt(" + d.id + ")'>削除</button>" +
