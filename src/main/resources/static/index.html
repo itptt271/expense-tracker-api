@@ -49,6 +49,10 @@
             border-bottom: 1px solid var(--line);
         }
 
+        #debtList li .debt-main{
+            flex: 1;
+            min-width: 200px;
+        }
         #debtList li .debt-amount{
             font-family: "SF Mono", "Menlo", monospace;
             font-weight: 600;
@@ -85,6 +89,53 @@
             background: var(--ink);
             color: var(--paper);
             border-color: var(--ink);
+        }
+
+        #txList, #searchResultsList{
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #txList Li, #searchResultsList li{
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        #txList li .tx-main, #searchResultsList li .tx-main{
+            flex: 1;
+            min-width: 160px;
+        }
+
+        #txList li .tx-amount, #searchResultsList li .tx-amount{
+            font-family: "SF Mono", "Menlo", monospace;
+            font-weight: 600;
+        }
+
+        #txList button, #searchResultsList button{
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--ink);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        #debtList .history-box{
+            flex-basis: 100%;
+            padding: 8px 0 0 16px;
+            border-left: 2px solid var(--line);
+            font-size: 13px;
+            color: var(--ink);
+        }
+
+        #debtList .history-box div{
+            padding: 4px 0;
         }
     </style>
 </head>
@@ -324,7 +375,9 @@
                 }else{
                     sign = "-";
                 }
-                listHtml = listHtml + "<li>" + t.date + " " +getCategoryLabel(t.category) + " " + sign + formatYen(t.amount) + " " +
+                listHtml = listHtml + "<li>" + 
+                    "<span class='tx-main'>" + t.date + " " +getCategoryLabel(t.category) + "</span>" +
+                    "<span class='tx-amount'>" + sign + formatYen(t.amount) + "</span>" +
                     "<button onclick='startEdit(" + t.id +")'>編集</button>" +
                     "<button onclick='deleteTransaction(" + t.id + ")'>削除</button></li>";
             }
@@ -473,11 +526,11 @@
                     status = "返済中";
                 }
                 listHtml = listHtml + "<li>" + 
-                    "<spam class='debt-main'>" + d.creditorName + " " + formatYen(d.amount) + " (残り" + formatYen(d.remainingAmount) + ", " + d.progressPercentage.toFixed(0) + "%, " + status + ") [借入日: " + d.borrowedDate + "]</spam>" +
+                    "<span class='debt-main'>" + d.creditorName + " " + formatYen(d.amount) + " (残り<span class='debt-amount'>" + formatYen(d.remainingAmount) + "</span>," + d.progressPercentage.toFixed(0) + "%, " + status + ") [借入日: " + d.borrowedDate + "]</span>" +
                     "<button onclick ='payDebt(" + d.id + ", " + d.remainingAmount +")'>返済</button>" + 
                     "<button onclick='toggleHistory(" + d.id + ")'>履歴を見る</button>" +
                     "<button onclick='deleteDebt(" + d.id + ")'>削除</button>" +
-                    "<div id='history-" + d.id + "' style='display:none;'></div>" +
+                    "<div id='history-" + d.id + "' class='history-box' style='display:none;'></div>" +
                     "</li>"; 
             }
             document.getElementById("debtList").innerHTML = listHtml;
