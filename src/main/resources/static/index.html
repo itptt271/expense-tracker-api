@@ -151,6 +151,20 @@
             color: var(--ink);
             opacity: 0.7;
         }
+
+        .progress-track{
+            width: 100%;
+            height: 8px;
+            background: var(--line);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill{
+            height: 100%;
+            background: var(--ink);
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -284,6 +298,10 @@
             if(clickedButton){
                 clickedButton.classList.add("active-tab")
             }
+            if(tabName === "search"){
+                document.getElementById("searchForm").reset();
+                document.getElementById("searchResultsList").innerHTML = "";
+            }
         }
         showTab("transactions", document.querySelector(".tabs button"));
         // カテゴリー一覧（Category.javaのgetJapaneseName()と対応）
@@ -368,7 +386,9 @@
                 const amount = categoryTotals[category];
                 const percentage = (amount / totalExpense * 100).toFixed(0);
                 rowsHtml = rowsHtml + "<tr><td>" + getCategoryLabel(category) + "</td><td>" +
-                    formatYen(amount) + "</td><td>" + percentage + "%</td></tr>";
+                    formatYen(amount) + "</td><td>" + percentage + "%" +
+                    "<div class='progress-track'><div class='progress-fill' style='width:" + percentage + "%;'></div></div>" + 
+                    "</td></tr>";
                 if(amount > maxAmount){
                     maxAmount = amount;
                     mostUsedCategory = category;
