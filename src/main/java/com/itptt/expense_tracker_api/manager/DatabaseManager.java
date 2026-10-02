@@ -6,6 +6,10 @@ import com.itptt.expense_tracker_api.model.Category;
 import com.itptt.expense_tracker_api.model.DebtPayment;
 import java.sql.Statement;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 public class DatabaseManager {
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseManager.class);
     private static final String DB_URL = "jdbc:sqlite:finance.db";
     // データベースへの接続を取得
     public static Connection connect(){
@@ -20,7 +25,7 @@ public class DatabaseManager {
         try {
             conn = DriverManager.getConnection(DB_URL);
         } catch (SQLException e) {
-            System.out.println("データベース接続に失敗しました: " + e.getMessage());
+            logger.error("データベース接続に失敗しました: {}", e.getMessage());
         }
         return conn;
     }
@@ -36,9 +41,9 @@ public class DatabaseManager {
         try (Connection conn = connect();
             Statement stmt = conn.createStatement()){
             stmt.execute(sql);
-            System.out.println("transactionsテーブルを作成しました。");
+            logger.info("transactionsテーブルを作成しました。");
         } catch (SQLException e) {
-            System.out.println("テーブル作成に失敗しました: " + e.getMessage());
+            logger.error("テーブル作成に失敗しました: {}", e.getMessage());
         }
     }
     // 取引をDBに追加
@@ -51,9 +56,9 @@ public class DatabaseManager {
                 pstmt.setString(3, category);
                 pstmt.setInt(4, amount);
                 pstmt.executeUpdate();
-                System.out.println("取引をDBに追加しました。");
+                logger.info("取引をDBに追加しました。");
         } catch (SQLException e) {
-            System.out.println("追加に失敗しました: " + e.getMessage());
+            logger.error("追加に失敗しました: {}", e.getMessage());
         }
     }
     // 全ての取引をDBから取得
@@ -73,7 +78,7 @@ public class DatabaseManager {
                     transactions.add(t);
                 }
         } catch (SQLException e) {
-            System.out.println("取得に失敗しました: " + e.getMessage());
+            logger.error("取得に失敗しました: {}", e.getMessage());
         }
         return transactions;
     }
@@ -106,7 +111,7 @@ public class DatabaseManager {
                     }
                 }
         } catch (SQLException e) {
-            System.out.println("検索に失敗しました: " + e.getMessage());
+            logger.error("検索に失敗しました: {}", e.getMessage());
         }
         return transactions;
     }
@@ -119,7 +124,7 @@ public class DatabaseManager {
                 int rowsAffected = pstmt.executeUpdate();
                 return rowsAffected > 0;
         } catch (SQLException e) {
-            System.out.println("削除に失敗しました: " + e.getMessage());
+            logger.error("削除に失敗しました: {}", e.getMessage());
             return false;
         }
     }
@@ -136,7 +141,7 @@ public class DatabaseManager {
                 int rowsAffected = pstmt.executeUpdate();
                 return rowsAffected > 0;
         } catch (SQLException e) {
-            System.out.println("更新に失敗しました: " + e.getMessage());
+            logger.error("更新に失敗しました: {}", e.getMessage());
             return false;
         }
     }
@@ -152,9 +157,9 @@ public class DatabaseManager {
         try (Connection conn = connect();
             Statement stmt = conn.createStatement()){
                 stmt.execute(sql);
-                System.out.println("debtsテーブルを作成しました。");
+                logger.info("debtsテーブルを作成しました。");
         } catch (SQLException e) {
-            System.out.println("テーブル作成に失敗しました: " + e.getMessage());
+            logger.error("テーブル作成に失敗しました: {}", e.getMessage());
         }
     }
     // DebtをDBに追加
@@ -168,7 +173,7 @@ public class DatabaseManager {
                 pstmt.setString(4, borrowedDate);
                 pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("追加に失敗しました: " + e.getMessage());
+            logger.error("追加に失敗しました: {}", e.getMessage());
         }
     }
     // 全てのDebtをDBから取得
@@ -187,7 +192,7 @@ public class DatabaseManager {
                     debts.add(new Debt(id, creditorName, amount,  paidAmount, borrowedDate));
                 }
         } catch (SQLException e) {
-            System.out.println("取得に失敗しました: " + e.getMessage());
+            logger.error("取得に失敗しました: {}", e.getMessage());
         }
         return debts;
     }
@@ -201,7 +206,7 @@ public class DatabaseManager {
                 int rowsAffected = pstmt.executeUpdate();
                 return rowsAffected > 0;   
         } catch (SQLException e) {
-            System.out.println("更新に失敗しました: " + e.getMessage());
+            logger.error("更新に失敗しました: {}", e.getMessage());
             return false;
         }
     }
@@ -221,7 +226,7 @@ public class DatabaseManager {
             }
         } 
         catch (SQLException e) {
-            System.out.println("削除に失敗しました: " + e.getMessage());
+            logger.error("削除に失敗しました: {}", e.getMessage());
             return false;
         }
     }
@@ -241,7 +246,7 @@ public class DatabaseManager {
                     }
                 }
         } catch (SQLException e) {
-            System.out.println("取得に失敗しました: " + e.getMessage());
+            logger.error("取得に失敗しました: {}", e.getMessage());
         }
         return null;
     }
@@ -257,9 +262,9 @@ public class DatabaseManager {
         try (Connection conn = connect();
             Statement stmt = conn.createStatement()){
                 stmt.execute(sql);
-                System.out.println("debt_paymentsテーブルを作成しました。");
+                logger.info("debt_paymentsテーブルを作成しました。");
         } catch (SQLException e) {
-            System.out.println("テーブル作成に失敗しました: " + e.getMessage());
+            logger.error("テーブル作成に失敗しました: {}", e.getMessage());
         }
     }
     // 返済履歴を1件追加
@@ -272,7 +277,7 @@ public class DatabaseManager {
                 pstmt.setInt(3, amount);
                 pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("返済履歴の追加に失敗しました: " + e.getMessage());
+            logger.error("返済履歴の追加に失敗しました: {}", e.getMessage());
         }
     }
     // 指定した借金IDの返済履歴を全て取得
@@ -291,7 +296,7 @@ public class DatabaseManager {
                     }
                 }
         } catch (SQLException e) {
-            System.out.println("返済履歴の取得に失敗しました: " + e.getMessage());
+            logger.error("返済履歴の取得に失敗しました: {}", e.getMessage());
         }
         return payments;
     }
