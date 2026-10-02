@@ -69,10 +69,10 @@ public class TransactionController {
     @DeleteMapping("/api/transactions/{id}")
     public ResponseEntity<String> deleteTransaction(@PathVariable  int id){
         boolean success = DatabaseManager.deleteTransaction(id);
-        if(success){
-            return ResponseEntity.status(HttpStatus.OK).body("取引を削除しました。");
+        if(!success){
+            throw new ResourceNotFoundException("指定されたIDの取引が見つかりません。");
         }else{
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("指定されたIDの取引が見つかりません。");
+            return ResponseEntity.status(HttpStatus.OK).body("取引を削除しました。");
         }
     }
     // リクエストデータの検証（POST・PUTで共通利用）

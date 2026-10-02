@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.itptt.expense_tracker_api.dto.DebtRequest;
 import com.itptt.expense_tracker_api.dto.PaymentRequest;
+import com.itptt.expense_tracker_api.exception.InvalidRequestException;
+import com.itptt.expense_tracker_api.exception.ResourceNotFoundException;
 import com.itptt.expense_tracker_api.manager.DatabaseManager;
 import com.itptt.expense_tracker_api.model.Debt;
 import com.itptt.expense_tracker_api.model.DebtPayment;
@@ -28,7 +30,7 @@ public class DebtController {
     @PostMapping("/api/debts")
     public ResponseEntity<String> addDebt(@RequestBody DebtRequest request){
         if(request.getAmount() <= 0){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("金額は0より大きい値を入力してください。");
+            throw new InvalidRequestException("金額は0より大きい値を入力してください。");
         }
         DatabaseManager.insertDebt(request.getCreditorName(), request.getAmount(), 0, request.getBorrowedDate());
         return ResponseEntity.status(HttpStatus.CREATED).body("借金を追加しました。");
@@ -38,15 +40,15 @@ public class DebtController {
     public ResponseEntity<String> payDebt(@PathVariable int id, @RequestBody PaymentRequest request){
         Debt debt = DatabaseManager.getDebtById(id);
         if(debt == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("指定されたIDの借金が見つかりません。");
+            throw new ResourceNotFoundException("指定されたIDの借金が見つかりません。");
         }
         int payment = request.getPayment();
         if(payment <= 0){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("返済額は0より大きい値を入力してください。");
+            throw new InvalidRequestException("返済額は0より大きい値を入力してください。");
         }
         int remaining = debt.getRemainingAmount();
         if(payment > remaining){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("返済額が残りの借金額（" + remaining + "円）を超えています。");
+            throw new InvalidRequestException("返済額が残りの借金額（" + remaining + "円）を超えています。");
         }
         int newPaidAmount = debt.getPaidAmount() + payment;
         DatabaseManager.updateDebtPayment(id, newPaidAmount);
@@ -64,8 +66,8 @@ public class DebtController {
     @DeleteMapping("/api/debts/{id}")
     public ResponseEntity<String> deleteDebt(@PathVariable int id){
         boolean success = DatabaseManager.deleteDebt(id);
-        if(success){
-            return ResponseEntity.status(HttpStatus.OK).body("借金を削除しました。");
+        if(!success){
+            throw new ResourceNotFoundException("指定されたIDの借金が見つかりません。");
         }else{
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("指定されたIDの借金が見つかりません。");
         }
