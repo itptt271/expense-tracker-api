@@ -252,6 +252,13 @@
             font-size: 20px;
             font-weight: 700;
         }
+
+        #txForm.editing{
+            border: 2px solid var(--ink);
+            border-radius: 6px;
+            padding: 16px;
+            background: #FFFFFF;
+        }
     </style>
 </head>
 <body>
@@ -363,6 +370,7 @@
         <input type="number" id="debtAmount" min="1" required>
 
         <button type="submit">借金を追加</button>
+        <button type="button" onclick="clearDebtFrom()">クリア</button>
     </form>
     <p>借金一覧</p>
     <ul id="debtList"></ul>
@@ -372,8 +380,10 @@
         const API_URL = "/api/transactions";
         let allTransactions = [];
         let editingId = null;
+        let editingFromTab = "transactions";
+        let lastSearchResults = [];
         // タブを切り替える
-        function showTab(tabName, clickedButton){
+        function showTab(tabName, clickedButton, keepSearchResults){
             const tabs = ["transactions", "search", "summary", "debts"];
             for(const name of tabs){
                 document.getElementById("tab-" + name).classList.remove("active");
@@ -387,7 +397,7 @@
             if(clickedButton){
                 clickedButton.classList.add("active-tab")
             }
-            if(tabName === "search"){
+            if(tabName === "search" && !keepSearchResults){
                 document.getElementById("searchForm").reset();
                 document.getElementById("searchResultsList").innerHTML = "";
             }
@@ -490,6 +500,9 @@
         // 取引一覧を画面に描画する（loadTransactionsとsearchTransactionsで共用）
         function renderTransactionList(transactions, targetListId){
             // 取引一覧のHTMLを組み立てる（編集・削除ボタン付き）
+            transactions.sort(function(a, b){
+                return b.date.localeCompare(a.date);
+            });
             let listHtml ="";
             for(const t of transactions){
                 let sign = "";
@@ -522,6 +535,7 @@
             }
             const res = await fetch(url);
             const transactions = await res.json();
+            lastSearchResults = transactions;
             renderTransactionList(transactions, "searchResultsList");
         }
         // 検索条件をクリアして、全ての取引を再表示
@@ -559,22 +573,39 @@
         // 編集ボタン - フォームに既存データを反映
         function startEdit(id){
             editingId = id;
-            const t = allTransactions.find(function(item){
+            const currentActiveTab = document.querySelector(".tabs button.active-tab").textContent;
+            if(currentActiveTab === "検索"){
+                editingFromTab = "search";
+            }else{
+                editingFromTab = "transactions";
+            }
+            let t = allTransactions.find(function(item){
                 return item.id === id;
             });
+            if(t === undefined){
+                t = lastSearchResults.find(function(item){
+                    return item.id === id;
+                });
+            }
+            showTab("transactions", document.querySelector(".tabs button"));
             document.getElementById("date").value = t.date;
             document.getElementById("type").value = t.type;
             document.getElementById("category").value = t.category;
             document.getElementById("amount").value = t.amount;
             document.getElementById("formTitle").textContent = "取引を編集";
             document.getElementById("submitBtn").textContent = "更新";
+            document.getElementById("txForm").classList.add("editing");
+            document.getElementById("txForm").scrollIntoView({ behavior: "smooth", block: "start"});
         }
         // キャンセルボタン - 編集状態を解除し、フォームを初期状態に戻す
         function cancelEdit(){
             editingId = null;
+            editingFromTab = "transactions";
             document.getElementById("txForm").reset();
+            refreshCategoryOptions();
             document.getElementById("formTitle").textContent = "取引を追加";
             document.getElementById("submitBtn").textContent = "追加";
+            document.getElementById("txForm").classList.remove("editing");
         }
         // DELETE - 取引を削除
         async function deleteTransaction(id){
@@ -586,6 +617,9 @@
                 method: "DELETE"
             });
             loadTransactions();
+            if(lastSearchResults.length > 0){
+                searchTransactions();
+            }
         }
         document.getElementById("txForm").addEventListener("submit", async function (event){
             event.preventDefault();
@@ -622,7 +656,16 @@
             }
             editingId = null;
             document.getElementById("txForm").reset();
-            loadTransactions();
+            refreshCategoryOptions();
+            document.getElementById("formTitle").textContent = "取引を追加";
+            document.getElementById("submitBtn").textContent = "追加";
+            document.getElementById("txForm").classList.remove("editing");
+            await loadTransactions();
+            if(editingFromTab === "search"){
+                await searchTransactions();
+                showTab("search", document.querySelectorAll(".tabs button")[1], true);
+            }
+            editingFromTab = "transactions";
         });
         document.getElementById("type").addEventListener("change", refreshCategoryOptions);
         refreshCategoryOptions();
@@ -636,7 +679,9 @@
         async function loadDebts() {
             const res = await fetch(DEBT_API_URL);
             const debts = await res.json();
-
+            debts.sort(function(a, b){
+                return b.borrowedDate.localeCompare(a.borrowedDate);
+            });
             let totalRemaining = 0;
             for(const d of debts){
                 totalRemaining = totalRemaining + d.remainingAmount;
@@ -722,6 +767,10 @@
 
             historyDiv.innerHTML = historyHtml;
             historyDiv.style.display = "block";
+        }
+        // 借金追加フォームをクリア（入力ミスをやり直す用）
+        function clearDebtFrom(){
+            document.getElementById("debtForm").reset();
         }
         document.getElementById("debtForm").addEventListener("submit", async function (event) {
             event.preventDefault();
