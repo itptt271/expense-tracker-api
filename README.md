@@ -16,6 +16,22 @@ This project is the web-based evolution of [PersonalExpenseTracker](https://gith
 
 ---
 
+## Screenshots
+
+**Summary — totals, savings rate, category breakdown**
+![Summary tab](./docs/summary.png)
+
+**Transactions — add, edit, delete**
+![Transactions tab](./docs/transactions.png)
+
+**Search — filter by category and/or date**
+![Search tab](./docs/searchTransaction.png)
+
+**Debts — track repayment progress and history**
+![Debts tab](./docs/debts.png)
+
+---
+
 ## Tech Stack
 
 - **Java 21**
