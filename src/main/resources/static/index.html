@@ -479,7 +479,7 @@
                 return;
             }
             let rowsHtml = "";
-            let mostUsedCategory = null;
+            let mostUsedCategories = [];
             let maxAmount = 0;
             for(const category in categoryTotals){
                 const amount = categoryTotals[category];
@@ -490,12 +490,18 @@
                     "</td></tr>";
                 if(amount > maxAmount){
                     maxAmount = amount;
-                    mostUsedCategory = category;
+                    mostUsedCategories = [category];
+                }else if(amount === maxAmount){
+                    mostUsedCategories.push(category);
                 }
+            }
+            const labels = [];
+            for(const c of mostUsedCategories){
+                labels.push(getCategoryLabel(c));
             }
             document.getElementById("categoryStatsBody").innerHTML = rowsHtml;
             document.getElementById("mostUsedCategory").textContent = 
-                "一番使ったカテゴリー: " + getCategoryLabel(mostUsedCategory);
+                "一番使ったカテゴリー: " + labels.join("、");
         }
         // 取引一覧を画面に描画する（loadTransactionsとsearchTransactionsで共用）
         function renderTransactionList(transactions, targetListId){
